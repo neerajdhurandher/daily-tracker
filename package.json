@@ -1,0 +1,23 @@
+{
+  "name": "daily-tracker-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Next.js application for daily tracking.",
+  "scripts": {
+    "dev": "next dev -p 5000",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "firebase": "^11.5.0",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "react-router-dom": "^7.4.0",
+    "react-uuid": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=12.22.0"
+  },
+  "license": "MIT"
+}

@@ -1,0 +1,95 @@
+/* Overlay for the popup */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Semi-transparent background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+/* Popup container */
+.popup-container {
+  background: #ffffff;
+  border-radius: 8px;
+  width: 400px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+/* Popup header */
+.popup-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.popup-header h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+/* Popup body */
+.popup-body label {
+  display: block;
+  margin-bottom: 15px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.popup-body input,
+.popup-body textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.popup-body textarea {
+  resize: none;
+  height: 80px;
+}
+
+.category-name > input {
+  width: 50%;
+  display: inline-block;
+  background-color: rgb(201, 196, 196);
+  color: rgb(21, 20, 20);
+  font-weight: 600;
+}
+
+/* Popup footer */
+.popup-footer {
+  text-align: right;
+}
+
+.save-button {
+  background-color: #4285f4;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.save-button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
