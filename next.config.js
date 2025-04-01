@@ -15,6 +15,6 @@ module.exports = {
   images: {
     unoptimized: true, // Disable image optimization for static export
   },
-  assetPrefix,
-  basePath,
+  assetPrefix: assetPrefix || '', // Ensure assetPrefix is always defined
+  basePath: basePath || '', // Ensure basePath is always defined
 };
