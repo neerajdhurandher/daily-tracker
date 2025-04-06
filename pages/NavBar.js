@@ -1,36 +1,60 @@
-import React, { useState, useEffect, use } from 'react';
+import React, { useState } from 'react';
+import Image from 'next/image';
+import PropTypes from 'prop-types';
+
 
 const NavBar = ({ user, onSignOut }) => {
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  // Prevent rendering if user is not logged in
 
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  // Prevent rendering if user is not logged in
   if (!user) return null;
 
   const toggleDropdown = () => {
-    // Toggle dropdown visibility
     setIsDropdownOpen((prev) => !prev);
   };
 
   const handleSignOut = () => {
-    // Close the dropdown
     setIsDropdownOpen(false);
-    // Call the sign-out function passed as a prop
     onSignOut();
   };
+
+  const handleFeedback = () => {
+    setIsDropdownOpen(false);
+    // Open feedback form in a new tab
+    window.open('https://forms.gle/HLoST9hdbcLcHozz8', '_blank');
+  }
 
   return (
     <nav>
       {user ? (
         <>
-          <span>{user.displayName}</span>
-          <img
+          <Image
+            src="/neeraj-logo.png"
+            alt="App Logo"
+            className="app-logo"
+            onClick={toggleDropdown}
+            width={40}
+            height={40}
+          />
+          <span className="app-name">Daily Tracker</span>
+          <Image
             src={user.photoURL}
             alt="User Profile"
-            onClick={toggleDropdown} // Toggle dropdown on image click
+            className='user-profile-pic'
+            onClick={toggleDropdown}
+            width={40}
+            height={40}
           />
           {isDropdownOpen && (
             <div className="nav-dropdown">
-              <button onClick={handleSignOut}>Sign Out</button>
+              <div className="dropdown-item username">{user.displayName}</div>
+              <div className="dropdown-item" onClick={handleFeedback}>
+                Feedback
+              </div>
+              <div className="dropdown-item signout" onClick={handleSignOut}>
+                Sign Out
+              </div>
             </div>
           )}
         </>
@@ -39,6 +63,13 @@ const NavBar = ({ user, onSignOut }) => {
       )}
     </nav>
   );
+};
+NavBar.propTypes = {
+  user: PropTypes.shape({
+    displayName: PropTypes.string.isRequired,
+    photoURL: PropTypes.string.isRequired,
+  }).isRequired,
+  onSignOut: PropTypes.func.isRequired,
 };
 
 export default NavBar;
