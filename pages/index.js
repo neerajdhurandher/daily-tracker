@@ -11,7 +11,7 @@ const Home = () => {
     useEffect(() => {
         const storedUser = sessionStorage.getItem('user');
         if (storedUser) {
-            setUser(JSON.parse(storedUser)); // Parse and set the user data
+            setUser(JSON.parse(storedUser));
         }
     }, []);
 
@@ -20,17 +20,15 @@ const Home = () => {
         try {
             userData = await signInWithGoogle();
             if (userData) {
-                // Store user details in state
                 setUser(userData);
-                // Save user data to session storage
                 sessionStorage.setItem('user', JSON.stringify(userData));
             } else {
                 alert("Error signing in with Google. Please try again.");
             }
         } catch (error) {
             console.error("Error during sign-in", error);
-            setUser(null); // Reset the user stateF
-            sessionStorage.removeItem('user'); // Remove user data from session storage
+            setUser(null); 
+            sessionStorage.removeItem('user');
         }
         setUser(userData);
     };
@@ -42,8 +40,8 @@ const Home = () => {
         } catch (error) {
             console.error("Error during sign-out", error);
         } finally {
-            setUser(null); // Reset the user state
-            sessionStorage.removeItem('user'); // Remove user data from session storage
+            setUser(null); 
+            sessionStorage.removeItem('user'); 
         }
     };
 

@@ -1,42 +1,30 @@
-/* Container for the entire page */
 .login-container {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: column;
   height: 100vh;
-  background-color: #f5f5f5;
   margin: 0;
+  color: #ffffff;
 }
 
-/* Header container styles */
 .header-container {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  /* Space between logo and title */
   position: fixed;
-  /* Fix the header at the top of the page */
   top: 0;
   left: 0;
   width: 100%;
-  /* Full width */
   height: 60px;
-  /* Set a fixed height for the header */
-  background-color: #ffffff;
-  /* Background color */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  /* Add a subtle shadow */
   padding: 0 20px;
-  /* Add padding on the sides */
   z-index: 1000;
-  /* Ensure it stays above other elements */
 }
 
-/* Application logo styles */
 .app-logo {
   width: 40px;
-  /* Set the logo size */
   height: 40px;
+  cursor: pointer;
   object-fit: contain;
   /* Ensure the logo maintains its aspect ratio */
   margin-left: auto;
@@ -44,19 +32,13 @@
 
 }
 
-/* Application title styles */
 .app-title {
-  font-size: 20px;
-  /* Adjust font size */
+  font-size: 28px;
   font-weight: bold;
-  color: #333333;
-  /* Dark text color */
+  color: #ffe600;
   text-align: center;
-  /* Center the title */
   flex-grow: 1;
-  /* Allow the title to take up remaining space */
   margin: 0;
-  /* Remove default margin */
 }
 
 
@@ -147,6 +129,21 @@
   /* Darker red */
 }
 
+.footer {
+  position: absolute;
+  width: 100%;
+  bottom: 0%;
+  padding: 10px;
+  font-size: 0.9rem;
+  text-align: center;
+  color: white;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.heart {
+  color: red;
+}
+
 /* Keyframes for loader animation */
 @keyframes spin {
   0% {
@@ -162,33 +159,24 @@
 @media (max-width: 768px) {
   .header-container {
     flex-direction: row;
-    /* Keep the logo and title in the same line */
     justify-content: center;
-    /* Center the content horizontally */
     align-items: center;
-    /* Align items vertically */
     height: auto;
-    /* Allow the height to adjust based on content */
     padding: 10px;
-    /* Add padding for smaller screens */
   }
 
   .app-logo {
     margin-bottom: 0;
-    /* Remove spacing below the logo */
     margin-right: 10px;
-    /* Add spacing to the right of the logo */
   }
 
   .app-title {
-    font-size: 18px;
-    /* Reduce the font size for smaller screens */
+    font-size: 24px;
     text-align: center;
-    /* Align the title text to the left */
   }
 
   .login-card {
-    padding: 20px;
+    padding: 5%;
   }
 
   .login-title {
@@ -200,7 +188,8 @@
   }
 
   .google-signin-button {
-    font-size: 14px;
-    padding: 8px 16px;
+    width: 80%;
+    margin: auto;
+    
   }
 }
