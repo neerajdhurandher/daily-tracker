@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCategories, saveCategory, updateCategory, deleteCategory } from '../lib/services/categoryService';
 import AddCategoryPopUp from '../lib/components/AddCategoryPopUp';
-import PageContainer from './PageContainer';
+import PageContainer from './TaskContainer';
 import uuid from 'react-uuid';
 import PropTypes from 'prop-types';
 import Image from 'next/image';

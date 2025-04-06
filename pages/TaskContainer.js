@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import AddItemPopUp from '../lib/components/AddItemPopUp';
 import { saveTask, getTasks } from '../lib/services/taskService';
 import uuid from 'react-uuid';
+import Image from 'next/image';
 
 const PageContainer = ({ user, category, onClose }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -9,23 +11,22 @@ const PageContainer = ({ user, category, onClose }) => {
   const [tasks, setTasks] = useState([]); // State to store tasks
   const [expandedTask, setExpandedTask] = useState(null); // Track which task's comment is expanded
 
-  if (!user) {
-    // Handle case when user is not logged in
-    return <div>Please log in to view tasks.</div>; 
-  }
-
   // Fetch tasks whenever the `user` state changes
   useEffect(() => {
     const fetchTasks = async () => {
+      if (!user) return; // Exit early if user is not logged in
       const userId = user.uid; // Assuming `user` is the logged-in user object
       const fetchedTasks = await getTasks(userId, category.id);
       setTasks(fetchedTasks); // Set tasks in local state
     };
 
-    if (user) {
-      fetchTasks();
-    }
+    fetchTasks();
   }, [user]);
+
+  // Handle case when user is not logged in
+  if (!user) {
+    return <div>Please log in to view tasks.</div>;
+  }
 
   // Load tasks from local storage when the component mounts
   useEffect(() => {
@@ -118,7 +119,7 @@ const PageContainer = ({ user, category, onClose }) => {
         <div className="page-header">
           <h2 className="page-title">{category.name}</h2>
           <button className="close-button" onClick={onClose}>
-            <img src="/arrow-back-icon.svg" alt="back" className="icon-image" />
+            <Image src="/arrow-back-icon.svg" alt="back" className="icon-image" width={40} height={40} />
           </button>
         </div>
         <div className="task-list">
@@ -145,11 +146,22 @@ const PageContainer = ({ user, category, onClose }) => {
         </div>
       </div>
       <div className="round-icon" onClick={togglePopup}>
-        <img src="plus-icon-white.svg" alt="Icon" className="icon-image" />
+        <Image src="plus-icon-white.svg" alt="Icon" className="icon-image" width={40} height={40}/>
       </div>
       {isPopupOpen && <AddItemPopUp category={category} onClose={togglePopup} onSave={addTask} isLoading={isLoading}/>}
     </>
   );
+};
+
+PageContainer.propTypes = {
+  user: PropTypes.shape({
+    uid: PropTypes.string.isRequired, // Assuming `uid` is a required string in the `user` object
+  }).isRequired,
+  category: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+  }).isRequired,
+  onClose: PropTypes.func.isRequired,
 };
 
 export default PageContainer;
