@@ -1,3 +1,5 @@
+/** @type {import('next').NextConfig} */
+
 const isGithubActions = process.env.GITHUB_ACTIONS || false;
 
 let assetPrefix = '';
@@ -13,6 +15,7 @@ module.exports = {
   reactStrictMode: true,
   output: 'export',
   images: {
+    domains: ['neerajdhurandher.me'], 
     unoptimized: true, // Disable image optimization for static export
   },
   assetPrefix: assetPrefix || '', // Ensure assetPrefix is always defined
