@@ -10,6 +10,7 @@ const TaskContainer = ({ user, category, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [tasks, setTasks] = useState([]); 
   const [expandedTask, setExpandedTask] = useState(null); 
+  const basePath = process.env.BASE_PATH || '';
 
   // Fetch tasks whenever the `user` state changes
   useEffect(() => {
@@ -113,7 +114,7 @@ const TaskContainer = ({ user, category, onClose }) => {
       <div className="page-container">
         <div className="page-header">
           <button className="close-button" onClick={onClose}>
-            <Image src="/arrow-back-icon.svg" alt="back" className="icon-image" width={50} height={40} />
+            <Image src={`{basePath}/arrow-back-icon.svg`} alt="back" className="icon-image" width={50} height={40} />
           </button>
           <span className="page-title">{category.name}</span>
         </div>
