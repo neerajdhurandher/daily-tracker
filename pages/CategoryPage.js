@@ -16,6 +16,8 @@ const CategoryPage = ({ user }) => {
     const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [isPageContainerOpen, setIsPageContainerOpen] = useState(false);
+    const basePath = process.env.BASE_PATH || '';
+
 
     // Check if user is logged in
     if (!user) {
@@ -196,7 +198,7 @@ const CategoryPage = ({ user }) => {
                                             e.stopPropagation(); // Prevent triggering the parent onClick
                                         }}>
                                         <Image
-                                            src="/three-dots-icon.svg"
+                                            src={`${basePath}/three-dots-icon.svg`}
                                             alt="Options"
                                             className="three-dots-icon"
                                             width={40}
@@ -219,7 +221,7 @@ const CategoryPage = ({ user }) => {
                             </div>
                         ))}
                         <div className="add-category-card" onClick={() => openPopup('add')}>
-                            <Image src="/plus-icon.svg" alt="Add" className="add-icon" width={40}
+                            <Image src={`${basePath}/plus-icon.svg`} alt="Add" className="add-icon" width={40}
                                 height={40} />
                         </div>
                     </div>
