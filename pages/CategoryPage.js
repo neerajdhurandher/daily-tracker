@@ -17,6 +17,7 @@ const CategoryPage = ({ user }) => {
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [isPageContainerOpen, setIsPageContainerOpen] = useState(false);
     const basePath = process.env.BASE_PATH || '';
+    console.log('Base Path:', basePath);
 
 
     // Check if user is logged in
@@ -33,7 +34,6 @@ const CategoryPage = ({ user }) => {
 
     // Fetch categories from localstorage or Firestore for the logged-in user
     useEffect(() => {
-        console.log('Fetching categories...');
         const storedCategories = localStorage.getItem('categories');
         if (storedCategories) {
             setCategories(JSON.parse(storedCategories));
@@ -80,7 +80,6 @@ const CategoryPage = ({ user }) => {
 
     // Toggle dropdown visibility
     const toggleDropdown = (categoryId) => {
-        console.log('toggleDropdown', categoryId);
         setOpenDropdownId((prevId) => (prevId === categoryId ? null : categoryId));
     };
 
@@ -169,8 +168,6 @@ const CategoryPage = ({ user }) => {
     
         // Calculate luminance
         const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255;
-        console.log('Luminance:', luminance, 'Background Color:', bgColor);
-        console.log('Text Color:', luminance > 0.5 ? 'black' : 'white',);
     
         // Set text color based on luminance
         element.style.color = luminance > 0.5 ? 'black' : 'white';
