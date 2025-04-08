@@ -16,7 +16,7 @@ const CategoryPage = ({ user }) => {
     const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [isPageContainerOpen, setIsPageContainerOpen] = useState(false);
-    const basePath = process.env.BASE_PATH || '';
+    const basePath = process.env.NEXT_BASE_PATH;
     console.log('Base Path:', basePath);
 
 

@@ -4,7 +4,7 @@ import Image from 'next/image';
 
 const Login = ({ onUserSignin }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const basePath = process.env.BASE_PATH || ''; 
+  const basePath = process.env.NEXT_BASE_PATH; 
 
   const handleSignIn = () => {
     console.log("Sign-in button clicked");

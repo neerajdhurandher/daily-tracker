@@ -10,7 +10,7 @@ const TaskContainer = ({ user, category, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [tasks, setTasks] = useState([]); 
   const [expandedTask, setExpandedTask] = useState(null); 
-  const basePath = process.env.BASE_PATH || '';
+  const basePath = process.env.NEXT_BASE_PATH;
 
   // Fetch tasks whenever the `user` state changes
   useEffect(() => {
