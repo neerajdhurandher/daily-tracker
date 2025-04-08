@@ -1,70 +1,67 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import AddItemPopUp from '../lib/components/AddItemPopUp';
 import { saveTask, getTasks } from '../lib/services/taskService';
 import uuid from 'react-uuid';
+import Image from 'next/image';
 
-const PageContainer = ({ user, category, onClose }) => {
+const TaskContainer = ({ user, category, onClose }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [tasks, setTasks] = useState([]); // State to store tasks
-  const [expandedTask, setExpandedTask] = useState(null); // Track which task's comment is expanded
-
-  if (!user) {
-    // Handle case when user is not logged in
-    return <div>Please log in to view tasks.</div>; 
-  }
+  const [tasks, setTasks] = useState([]); 
+  const [expandedTask, setExpandedTask] = useState(null); 
+  const basePath = process.env.BASE_PATH || '';
 
   // Fetch tasks whenever the `user` state changes
   useEffect(() => {
     const fetchTasks = async () => {
-      const userId = user.uid; // Assuming `user` is the logged-in user object
+      if (!user) return; // Exit early if user is not logged in
+      const userId = user.uid; 
       const fetchedTasks = await getTasks(userId, category.id);
-      setTasks(fetchedTasks); // Set tasks in local state
+      setTasks(fetchedTasks);
     };
 
-    if (user) {
-      fetchTasks();
-    }
+    fetchTasks();
   }, [user]);
+
+  // Handle case when user is not logged in
+  if (!user) {
+    return <div>Please log in to view tasks.</div>;
+  }
 
   // Load tasks from local storage when the component mounts
   useEffect(() => {
-    console.log('Loading tasks from local storage...');
     const storedTasks = localStorage.getItem('tasks');
     if (storedTasks) {
       try {
         const parsedTasks = JSON.parse(storedTasks);
-        setTasks(parsedTasks); // Parse and set tasks from local storage
-        console.log('Tasks loaded successfully!');
+        setTasks(parsedTasks);
       } catch (error) {
         console.error('Error parsing tasks from localStorage:', error);
-        setTasks([]); // Reset tasks if parsing fails
+        setTasks([]);
       }
     }
-  }, []); // Runs only once when the component mounts
+  }, []);
 
   // Save tasks to local storage whenever they change
   useEffect(() => {
     if (tasks.length > 0) {
-      console.log('Saving tasks to local storage...');
       localStorage.setItem('tasks', JSON.stringify(tasks));
     }
-  }, [tasks]); // Runs whenever the `tasks` state changes
+  }, [tasks]);
 
   const togglePopup = () => {
-    setIsPopupOpen((prev) => !prev); // Toggle popup visibility
-    setIsLoading(false); // Reset loading state
+    setIsPopupOpen((prev) => !prev);
+    setIsLoading(false);
   };
 
   const addTask = async (task) => {
-    console.log('Saving task...');
-    setIsLoading(true); // Set loading state
-    const userId = user.uid; // Assuming `user` is the logged-in user object
-    const taskWithId = { ...task, task_id: uuid(), user_id: userId, categoryId: category.id }; // Add task_id and user_id
+    setIsLoading(true); 
+    const userId = user.uid;
+    const taskWithId = { ...task, task_id: uuid(), user_id: userId, categoryId: category.id }; 
     await saveTask(userId, taskWithId);
-    setTasks((prevTasks) => [...prevTasks, taskWithId]); // Update local state
-    togglePopup(); // Close the popup
-    console.log('Task saved successfully!');
+    setTasks((prevTasks) => [...prevTasks, taskWithId]);
+    togglePopup(); 
   };
 
   // Group tasks by date in descending order and sort tasks by time within each date group
@@ -86,9 +83,9 @@ const PageContainer = ({ user, category, onClose }) => {
 
       // Compare times in descending order
       if (hoursA !== hoursB) {
-        return hoursB - hoursA; // Compare hours
+        return hoursB - hoursA;
       }
-      return minutesB - minutesA; // Compare minutes
+      return minutesB - minutesA;
     });
   });
 
@@ -109,20 +106,32 @@ const PageContainer = ({ user, category, onClose }) => {
   };
 
   const toggleComment = (taskIndex) => {
-    setExpandedTask((prev) => (prev === taskIndex ? null : taskIndex)); // Toggle comment visibility
+    setExpandedTask((prev) => (prev === taskIndex ? null : taskIndex));
   };
 
   return (
     <>
       <div className="page-container">
         <div className="page-header">
-          <h2 className="page-title">{category.name}</h2>
           <button className="close-button" onClick={onClose}>
-            <img src="/arrow-back-icon.svg" alt="back" className="icon-image" />
+            <Image src={`{basePath}/arrow-back-icon.svg`} alt="back" className="icon-image" width={50} height={40} />
           </button>
+          <span className="page-title">{category.name}</span>
         </div>
         <div className="task-list">
-          {sortedDates.map((date) => (
+        {sortedDates.length === 0 ? (
+          <div className="no-tasks-container">
+            <Image
+              src="/no-task-icon.svg" 
+              alt="No tasks"
+              className="no-tasks-image"
+              width={150}
+              height={150}
+            />
+            <p className="no-tasks-text">No tasks</p>
+          </div>
+        ) : (
+          sortedDates.map((date) => (
             <div key={date} className="task-group">
               <h3 className="task-date">{formatDate(date)}</h3>
               {groupedTasks[date].map((task, index) => (
@@ -141,15 +150,27 @@ const PageContainer = ({ user, category, onClose }) => {
                 </div>
               ))}
             </div>
-          ))}
+          ))
+          )}
         </div>
       </div>
       <div className="round-icon" onClick={togglePopup}>
-        <img src="plus-icon-white.svg" alt="Icon" className="icon-image" />
+        <Image src="plus-icon-white.svg" alt="Icon" className="icon-image" width={40} height={40}/>
       </div>
       {isPopupOpen && <AddItemPopUp category={category} onClose={togglePopup} onSave={addTask} isLoading={isLoading}/>}
     </>
   );
 };
 
-export default PageContainer;
+TaskContainer.propTypes = {
+  user: PropTypes.shape({
+    uid: PropTypes.string.isRequired, // Assuming `uid` is a required string in the `user` object
+  }).isRequired,
+  category: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    name: PropTypes.string.isRequired,
+  }).isRequired,
+  onClose: PropTypes.func.isRequired,
+};
+
+export default TaskContainer;

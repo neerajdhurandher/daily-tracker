@@ -1,7 +1,8 @@
-import react from "react";
 import Login from "./Login";
 import NavBar from "./NavBar";
 import CategoryPage from "./CategoryPage";
+import PropTypes from "prop-types";
+
 const LandingPage = ({ user, handleSignIn, onSignOut }) => {
     return (
         <>
@@ -18,4 +19,10 @@ const LandingPage = ({ user, handleSignIn, onSignOut }) => {
         </>
     );
 }
+
+LandingPage.propTypes = {
+    user: PropTypes.object,
+    handleSignIn: PropTypes.func.isRequired,
+    onSignOut: PropTypes.func.isRequired,
+};
 export default LandingPage;
