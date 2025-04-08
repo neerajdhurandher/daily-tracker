@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import AddItemPopUp from '../lib/components/AddItemPopUp';
+import Login from './Login';
 import { saveTask, getTasks } from '../lib/services/taskService';
 import uuid from 'react-uuid';
 import Image from 'next/image';
@@ -8,17 +9,50 @@ import Image from 'next/image';
 const TaskContainer = ({ user, category, onClose }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [tasks, setTasks] = useState([]); 
-  const [expandedTask, setExpandedTask] = useState(null); 
+  const [tasks, setTasks] = useState([]);
+  const [expandedTask, setExpandedTask] = useState(null);
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
+
+
+  const userId = user ? user.uid : null; // Get user ID if user is logged in
+
+  if (!user || !userId) {
+    return <Login /> // Handle case when user is not logged in
+  }
+
+  // store the tasks in local storage
+  const storeTasksInLocalStorage = (tasks) => {
+    const taskObject = { userId: userId, tasks: tasks };
+    localStorage.setItem('tasks', JSON.stringify(taskObject));
+    loadTasksFromLocalStorage();
+  }
+
+  // Load tasks from local storage
+  const loadTasksFromLocalStorage = () => {
+    const storedTasks = localStorage.getItem('tasks');
+    if (storedTasks) {
+      const parsedTasks = JSON.parse(storedTasks);
+      if (parsedTasks.userId === userId) {
+        // filter the tasks by category id
+        const filteredTasks = parsedTasks.tasks.filter((task) => task.categoryId === category.id);
+        setTasks(filteredTasks);
+      } else {
+        setTasks([]);
+      }
+    }
+  };
 
   // Fetch tasks whenever the `user` state changes
   useEffect(() => {
     const fetchTasks = async () => {
       if (!user) return; // Exit early if user is not logged in
-      const userId = user.uid; 
+      const userId = user.uid;
       const fetchedTasks = await getTasks(userId, category.id);
-      setTasks(fetchedTasks);
+      if (fetchedTasks) {
+        storeTasksInLocalStorage(fetchedTasks); 
+      } else {
+        storeTasksInLocalStorage([]);
+      }
     };
 
     fetchTasks();
@@ -31,37 +65,21 @@ const TaskContainer = ({ user, category, onClose }) => {
 
   // Load tasks from local storage when the component mounts
   useEffect(() => {
-    const storedTasks = localStorage.getItem('tasks');
-    if (storedTasks) {
-      try {
-        const parsedTasks = JSON.parse(storedTasks);
-        setTasks(parsedTasks);
-      } catch (error) {
-        console.error('Error parsing tasks from localStorage:', error);
-        setTasks([]);
-      }
-    }
+    loadTasksFromLocalStorage();
   }, []);
-
-  // Save tasks to local storage whenever they change
-  useEffect(() => {
-    if (tasks.length > 0) {
-      localStorage.setItem('tasks', JSON.stringify(tasks));
-    }
-  }, [tasks]);
 
   const togglePopup = () => {
     setIsPopupOpen((prev) => !prev);
     setIsLoading(false);
   };
 
-  const addTask = async (task) => {
-    setIsLoading(true); 
+  const addTask = async (newTask) => {
+    setIsLoading(true);
     const userId = user.uid;
-    const taskWithId = { ...task, task_id: uuid(), user_id: userId, categoryId: category.id }; 
+    const taskWithId = { ...newTask, task_id: uuid(), user_id: userId, categoryId: category.id };
     await saveTask(userId, taskWithId);
-    setTasks((prevTasks) => [...prevTasks, taskWithId]);
-    togglePopup(); 
+    storeTasksInLocalStorage([...tasks, taskWithId]);
+    togglePopup();
   };
 
   // Group tasks by date in descending order and sort tasks by time within each date group
@@ -119,45 +137,45 @@ const TaskContainer = ({ user, category, onClose }) => {
           <span className="page-title">{category.name}</span>
         </div>
         <div className="task-list">
-        {sortedDates.length === 0 ? (
-          <div className="no-tasks-container">
-            <Image
-              src={`${basePath}/no-task-icon.svg`} 
-              alt="No tasks"
-              className="no-tasks-image"
-              width={150}
-              height={150}
-            />
-            <p className="no-tasks-text">No tasks</p>
-          </div>
-        ) : (
-          sortedDates.map((date) => (
-            <div key={date} className="task-group">
-              <h3 className="task-date">{formatDate(date)}</h3>
-              {groupedTasks[date].map((task, index) => (
-                <div
-                  key={index}
-                  className={`task-card ${expandedTask === `${date}-${index}` ? 'expanded' : ''}`}
-                  onClick={() => toggleComment(`${date}-${index}`)}
-                >
-                  <h4 className="task-title">{task.title}</h4>
-                  <p className="task-time">{task.time}</p>
-                  {expandedTask === `${date}-${index}` && (
-                    <p className={`task-comment ${task.comment ? '' : 'no-comment'}`}>
-                      {task.comment || 'No comments'}
-                    </p>
-                  )}
-                </div>
-              ))}
+          {sortedDates.length === 0 ? (
+            <div className="no-tasks-container">
+              <Image
+                src={`${basePath}/no-task-icon.svg`}
+                alt="No tasks"
+                className="no-tasks-image"
+                width={150}
+                height={150}
+              />
+              <p className="no-tasks-text">No tasks</p>
             </div>
-          ))
+          ) : (
+            sortedDates.map((date) => (
+              <div key={date} className="task-group">
+                <h3 className="task-date">{formatDate(date)}</h3>
+                {groupedTasks[date].map((task, index) => (
+                  <div
+                    key={index}
+                    className={`task-card ${expandedTask === `${date}-${index}` ? 'expanded' : ''}`}
+                    onClick={() => toggleComment(`${date}-${index}`)}
+                  >
+                    <h4 className="task-title">{task.title}</h4>
+                    <p className="task-time">{task.time}</p>
+                    {expandedTask === `${date}-${index}` && (
+                      <p className={`task-comment ${task.comment ? '' : 'no-comment'}`}>
+                        {task.comment || 'No comments'}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            ))
           )}
         </div>
       </div>
       <div className="round-icon" onClick={togglePopup}>
-        <Image src={`${basePath}plus-icon-white.svg`} alt="Icon" className="icon-image" width={40} height={40}/>
+        <Image src={`${basePath}/plus-icon-white.svg`} alt="Icon" className="icon-image" width={40} height={40} />
       </div>
-      {isPopupOpen && <AddItemPopUp category={category} onClose={togglePopup} onSave={addTask} isLoading={isLoading}/>}
+      {isPopupOpen && <AddItemPopUp category={category} onClose={togglePopup} onSave={addTask} isLoading={isLoading} />}
     </>
   );
 };
