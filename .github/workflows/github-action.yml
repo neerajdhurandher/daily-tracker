@@ -25,6 +25,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
+      GITHUB_ACTIONS : true
       GITHUB_REPOSITORY: neerajdhurandher/daily-tracker
     steps:
       - name: Checkout

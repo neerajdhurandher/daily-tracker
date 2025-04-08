@@ -15,7 +15,6 @@ module.exports = {
   reactStrictMode: true,
   output: 'export',
   images: {
-    domains: ['neerajdhurandher.me'], 
     unoptimized: true, // Disable image optimization for static export
   },
   assetPrefix: assetPrefix || '', // Ensure assetPrefix is always defined
