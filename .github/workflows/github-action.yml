@@ -29,7 +29,9 @@ jobs:
       GITHUB_REPOSITORY: ${{ github.repository }}
     steps:
       - name : Check GITHUB_ACTIONS
-        run: echo "GITHUB_ACTIONS= $GITHUB_ACTIONS"
+        run: |
+          echo "GITHUB_ACTIONS= $GITHUB_ACTIONS"
+          echo "GITHUB_REPOSITORY= $GITHUB_REPOSITORY"
         
       - name: Checkout
         uses: actions/checkout@v4
