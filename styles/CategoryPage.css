@@ -9,7 +9,7 @@
 }
 
 .category-header-text {
-  font-size: 24px;
+  font-size: 2.2rem;
   font-weight: 600;
   color: #ffe600;
 }
@@ -99,7 +99,7 @@
   justify-content: center;
   align-items: center;
   background-color: #f5f5f5;
-  border: 2px dashed #ccc;
+  border: 2px dashed #6a6767;
   border-radius: 8px;
   cursor: pointer;
 }
@@ -201,9 +201,9 @@
 
 @media (min-width: 768px) {
   .category-page {
-    height: 74vh;
-    margin: 5%;
-    margin-top: 3%;
+    height: 80vh;
+    margin: 3% 5%;
+    margin-bottom: 2%;
   }
 
   .category-grid {

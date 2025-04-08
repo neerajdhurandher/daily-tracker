@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getCategories, saveCategory, updateCategory, deleteCategory } from '../lib/services/categoryService';
 import AddCategoryPopUp from '../lib/components/AddCategoryPopUp';
-import PageContainer from './TaskContainer';
+import TaskContainer from './TaskContainer';
 import uuid from 'react-uuid';
 import PropTypes from 'prop-types';
 import Image from 'next/image';
@@ -11,7 +11,7 @@ const CategoryPage = ({ user }) => {
     const [categories, setCategories] = useState([]);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [popupMode, setPopupMode] = useState('add'); // 'add' or 'edit'
+    const [popupMode, setPopupMode] = useState('add');
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
     const [openDropdownId, setOpenDropdownId] = useState(null);
@@ -177,7 +177,7 @@ const CategoryPage = ({ user }) => {
     return (
         <>
             {(isPageContainerOpen && selectedCategory) ? (
-                <PageContainer user={user} category={selectedCategory} onClose={closePageContainer} />
+                <TaskContainer user={user} category={selectedCategory} onClose={closePageContainer} />
             ) : (
                 <div className="category-page">
                     <span className="category-header-text">Categories</span>
