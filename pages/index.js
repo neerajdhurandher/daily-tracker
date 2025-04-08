@@ -41,7 +41,10 @@ const Home = () => {
             console.error("Error during sign-out", error);
         } finally {
             setUser(null); 
-            sessionStorage.removeItem('user'); 
+            sessionStorage.removeItem('user');
+            // remove all local storage data
+            localStorage.removeItem('tasks');
+            localStorage.removeItem('categories'); 
         }
     };
 

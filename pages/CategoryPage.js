@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { getCategories, saveCategory, updateCategory, deleteCategory } from '../lib/services/categoryService';
 import AddCategoryPopUp from '../lib/components/AddCategoryPopUp';
 import TaskContainer from './TaskContainer';
+import Login from './Login';
 import uuid from 'react-uuid';
 import PropTypes from 'prop-types';
 import Image from 'next/image';
@@ -17,30 +18,55 @@ const CategoryPage = ({ user }) => {
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [isPageContainerOpen, setIsPageContainerOpen] = useState(false);
     const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
-    console.log('Base Path:', basePath);
 
 
     // Check if user is logged in
-    if (!user) {
-        return <div>Please log in to view categories.</div>;
+    if (!user || !user.uid) {
+        return <Login />; // Redirect to login if user is not logged in
     }
+
+    const userId = user.uid; // Get user ID from the user object
 
     const fetchCategories = async () => {
         if (!user?.uid) return;
         const fetchedCategories = await getCategories(user.uid);
         setCategories(fetchedCategories);
-        localStorage.setItem('categories', JSON.stringify(fetchedCategories));
+        saveCategoryInLocalStorage(fetchedCategories);
+    };
+
+    //  save categories in local storage
+    const saveCategoryInLocalStorage = (category) => {
+        if (!category) return;
+        const userCategories = { userId: user.uid, categories: category };
+        localStorage.setItem('categories', JSON.stringify(userCategories));
+        loadCategoriesFromLocalStorage();
+    };
+
+    // fetch categories from local storage
+    const loadCategoriesFromLocalStorage = () => {
+        const storedCategories = localStorage.getItem('categories');
+        if (storedCategories) {
+            const parsedCategories = JSON.parse(storedCategories);
+            // Check if the stored categories belong to the current user
+            if (parsedCategories.userId !== userId) {
+                setCategories([]);
+            } else {
+                const currentUserCategories = parsedCategories.categories
+                if (currentUserCategories) {
+                    setCategories(currentUserCategories);
+                } else {
+                    setCategories([]);
+                }
+
+            }
+        } else {
+            fetchCategories();
+        }
     };
 
     // Fetch categories from localstorage or Firestore for the logged-in user
     useEffect(() => {
-        const storedCategories = localStorage.getItem('categories');
-        if (storedCategories) {
-            setCategories(JSON.parse(storedCategories));
-        } else {
-            fetchCategories();
-        }
-
+        fetchCategories();
     }, [user]);
 
     // Close dropdown when clicking outside
@@ -110,7 +136,7 @@ const CategoryPage = ({ user }) => {
             const savedCategoryResult = await saveCategory(user.uid, newCategory);
             if (!savedCategoryResult) return;
             setCategories((prev) => [...prev, newCategory]);
-            localStorage.setItem('categories', JSON.stringify([...categories, newCategory]));
+            saveCategoryInLocalStorage([...categories, newCategory]);
         } else if (popupMode === 'edit' && selectedCategory) {
             const updatedCategory = { ...selectedCategory, ...formData, updatedAt: time };
             await updateCategory(user.uid, selectedCategory.id, updatedCategory);
@@ -118,7 +144,7 @@ const CategoryPage = ({ user }) => {
                 cat.id === selectedCategory.id ? updatedCategory : cat
             );
             setCategories(updatedCategories);
-            localStorage.setItem('categories', JSON.stringify(updatedCategories));
+            saveCategoryInLocalStorage(updatedCategories);
         }
         closePopup();
     };
@@ -144,7 +170,7 @@ const CategoryPage = ({ user }) => {
         await deleteCategory(user.uid, selectedCategory.id);
         const updatedCategories = categories.filter((cat) => cat.id !== selectedCategory.id);
         setCategories(updatedCategories);
-        localStorage.setItem('categories', JSON.stringify(updatedCategories));
+        saveCategoryInLocalStorage(updatedCategories);
         closeDeletePopup();
     };
 
@@ -153,7 +179,7 @@ const CategoryPage = ({ user }) => {
         const superParent = parent.parentElement; // category-card div
         const parentStyle = window.getComputedStyle(superParent);
         let bgColor = parentStyle.backgroundColor;
-    
+
         // Convert hex or named colors to RGB if necessary
         if (!bgColor.startsWith('rgb')) {
             const tempDiv = document.createElement('div');
@@ -162,13 +188,13 @@ const CategoryPage = ({ user }) => {
             bgColor = window.getComputedStyle(tempDiv).backgroundColor;
             document.body.removeChild(tempDiv);
         }
-    
+
         // Extract RGB values
         const rgb = bgColor.match(/\d+/g).map(Number);
-    
+
         // Calculate luminance
         const luminance = (0.299 * rgb[0] + 0.587 * rgb[1] + 0.114 * rgb[2]) / 255;
-    
+
         // Set text color based on luminance
         element.style.color = luminance > 0.5 ? 'black' : 'white';
     }
