@@ -3,3 +3,5 @@ node_modules
 .vite
 .next
 data.json
+out
+.gitignore

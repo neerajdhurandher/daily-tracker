@@ -6,7 +6,7 @@ import PropTypes from 'prop-types';
 const NavBar = ({ user, onSignOut }) => {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const basePath = process.env.BASE_PATH || '';
+  const basePath = process.env.NEXT_BASE_PATH;
 
   // Prevent rendering if user is not logged in
   if (!user) return null;
