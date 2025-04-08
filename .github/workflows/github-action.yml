@@ -28,6 +28,9 @@ jobs:
       GITHUB_ACTIONS : true
       GITHUB_REPOSITORY: neerajdhurandher/daily-tracker
     steps:
+      - name : Check GITHUB_ACTIONS
+        run: echo "GITHUB_ACTIONS= $GITHUB_ACTIONS"
+        
       - name: Checkout
         uses: actions/checkout@v4
       - name: Detect package manager
