@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 const NavBar = ({ user, onSignOut }) => {
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const basePath = process.env.BASE_PATH || '';
 
   // Prevent rendering if user is not logged in
   if (!user) return null;
@@ -30,7 +31,7 @@ const NavBar = ({ user, onSignOut }) => {
       {user ? (
         <>
           <Image
-            src="/neeraj-logo.png"
+            src={`${basePath}/neeraj-logo.png`}
             alt="App Logo"
             className="app-logo"
             onClick={toggleDropdown}

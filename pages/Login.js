@@ -3,7 +3,8 @@ import PropTypes from 'prop-types';
 import Image from 'next/image';
 
 const Login = ({ onUserSignin }) => {
-  const [isLoading, setIsLoading] = useState(false); 
+  const [isLoading, setIsLoading] = useState(false);
+  const basePath = process.env.BASE_PATH || ''; 
 
   const handleSignIn = () => {
     console.log("Sign-in button clicked");
@@ -32,7 +33,7 @@ const Login = ({ onUserSignin }) => {
       <div className="login-container">
         <div className="header-container">
           <Image
-            src="/neeraj-logo.png"
+            src={`${basePath}/neeraj-logo.png`}
             alt="Application Logo"
             className="app-logo"
             width={50}
@@ -51,7 +52,7 @@ const Login = ({ onUserSignin }) => {
               disabled={isLoading} // Disable button while loading
             >
               <Image
-                src="/google-icon.svg"
+                src={`${basePath}/google-icon.svg`}
                 alt="Google Icon"
                 className="google-icon"
                 width={20}

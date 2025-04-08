@@ -114,7 +114,7 @@ const TaskContainer = ({ user, category, onClose }) => {
       <div className="page-container">
         <div className="page-header">
           <button className="close-button" onClick={onClose}>
-            <Image src={`{basePath}/arrow-back-icon.svg`} alt="back" className="icon-image" width={50} height={40} />
+            <Image src={`${basePath}/arrow-back-icon.svg`} alt="back" className="icon-image" width={50} height={40} />
           </button>
           <span className="page-title">{category.name}</span>
         </div>
@@ -122,7 +122,7 @@ const TaskContainer = ({ user, category, onClose }) => {
         {sortedDates.length === 0 ? (
           <div className="no-tasks-container">
             <Image
-              src="/no-task-icon.svg" 
+              src={`${basePath}/no-task-icon.svg`} 
               alt="No tasks"
               className="no-tasks-image"
               width={150}
@@ -155,7 +155,7 @@ const TaskContainer = ({ user, category, onClose }) => {
         </div>
       </div>
       <div className="round-icon" onClick={togglePopup}>
-        <Image src="plus-icon-white.svg" alt="Icon" className="icon-image" width={40} height={40}/>
+        <Image src={`${basePath}plus-icon-white.svg`} alt="Icon" className="icon-image" width={40} height={40}/>
       </div>
       {isPopupOpen && <AddItemPopUp category={category} onClose={togglePopup} onSave={addTask} isLoading={isLoading}/>}
     </>
