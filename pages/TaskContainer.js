@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import AddItemPopUp from '../lib/components/AddItemPopUp';
 import Login from './Login';
-import { saveTask, getTasks } from '../lib/services/taskService';
+import { saveTask, getTasks, updateTask, deleteTask } from '../lib/services/taskService';
 import uuid from 'react-uuid';
 import Image from 'next/image';
 
@@ -11,6 +11,11 @@ const TaskContainer = ({ user, category, onClose }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [tasks, setTasks] = useState([]);
   const [expandedTask, setExpandedTask] = useState(null);
+  const [popupMode, setPopupMode] = useState('add');
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [isDeletePopupOpen, setIsDeletePopupOpen] = useState(false);
+  const [openDropdownId, setOpenDropdownId] = useState(null);
+
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH;
 
 
@@ -49,7 +54,7 @@ const TaskContainer = ({ user, category, onClose }) => {
       const userId = user.uid;
       const fetchedTasks = await getTasks(userId, category.id);
       if (fetchedTasks) {
-        storeTasksInLocalStorage(fetchedTasks); 
+        storeTasksInLocalStorage(fetchedTasks);
       } else {
         storeTasksInLocalStorage([]);
       }
@@ -68,18 +73,125 @@ const TaskContainer = ({ user, category, onClose }) => {
     loadTasksFromLocalStorage();
   }, []);
 
+
+  // Close dropdown if clicked outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      // Close the dropdown if the click is outside any dropdown
+      if (!event.target.closest('.dropdown')) {
+        setOpenDropdownId(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+
+  // Toggle dropdown visibility
+  const toggleDropdown = (taskId) => {
+    setOpenDropdownId((prevId) => (prevId === taskId ? null : taskId));
+  };
+
+  const openPopup = (mode, task = null) => {
+    setIsPopupOpen(true);
+    setPopupMode(mode);
+    if (mode === 'edit' && task) {
+      setSelectedTask(task);
+    } else {
+      setSelectedTask(null);
+    }
+  };
+
+  // Open delete confirmation popup
+  const openDeletePopup = (task) => {
+    toggleDropdown(task.task_id);
+    setSelectedTask(task);
+    setIsDeletePopupOpen(true);
+  };
+
+  // Close delete confirmation popup
+  const closeDeletePopup = () => {
+    setIsLoading(false);
+    setIsDeletePopupOpen(false);
+    setSelectedTask(null);
+  };
+
   const togglePopup = () => {
     setIsPopupOpen((prev) => !prev);
     setIsLoading(false);
+    toggleDropdown((prev) => (prev === openDropdownId ? null : openDropdownId));
   };
 
-  const addTask = async (newTask) => {
+  // Handle save action for adding or editing tasks
+  const handleSave = async (newTask) => {
+    // Ensure user id logged in
+    if (!user) {
+      alert('Please log in to save tasks.');
+      return <Login />; // Handle case when user is not logged in
+    }
     setIsLoading(true);
     const userId = user.uid;
-    const taskWithId = { ...newTask, task_id: uuid(), user_id: userId, categoryId: category.id };
-    await saveTask(userId, taskWithId);
-    storeTasksInLocalStorage([...tasks, taskWithId]);
+    if (popupMode === 'add') {
+      const taskWithId = { ...newTask, task_id: uuid(), user_id: userId, categoryId: category.id };
+      let result = await saveTask(userId, taskWithId);
+      if (result) {
+        storeTasksInLocalStorage([...tasks, taskWithId]);
+      }
+      // If editing an existing task, update it
+    } else if (popupMode === 'edit' && selectedTask) {
+      const updatedTask = { ...newTask, task_id: selectedTask.task_id, user_id: userId, categoryId: category.id };
+
+      let result = await updateTask(userId, selectedTask.task_id, updatedTask);
+      if (result) {
+        storeTasksInLocalStorage([...tasks.filter(task => task.task_id !== selectedTask.task_id), updatedTask]);
+      }
+    }
     togglePopup();
+
+  };
+
+  const handleDelete = async () => {
+    setIsLoading(true);
+    const userId = user.uid;
+    const taskId = selectedTask.task_id;
+    const updatedTasks = tasks.filter((task) => task.task_id !== taskId);
+    let result = await deleteTask(userId, taskId);
+    if (result) {
+      storeTasksInLocalStorage(updatedTasks);
+    }
+    closeDeletePopup();
+  }
+
+  function convertTo12HourFormat(time24h) {
+    // Validate the input format (hh:mm:ss)
+    const isValidFormat = /^\d{2}:\d{2}:\d{2}$/.test(time24h);
+    if (!isValidFormat) {
+      return "not available";
+    }
+
+    // Split the time into hours, minutes, and seconds
+    const [hours, minutes] = time24h.split(':').map(Number);
+
+    // Validate hours and minutes range
+    if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+      return "not available";
+    }
+
+    // Determine AM/PM and convert hours to 12-hour format
+    const period = hours >= 12 ? "PM" : "AM";
+    const hours12 = hours % 12 || 12; // Convert 0 to 12 for 12-hour format
+
+    // Return the formatted time
+    return `${hours12}:${minutes.toString().padStart(2, '0')} ${period}`;
+  }
+
+
+  const trimTime = (time) => {
+    const [hours, minutes, seconds] = time.split(':').map(Number);
+    return `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
   };
 
   // Group tasks by date in descending order and sort tasks by time within each date group
@@ -96,14 +208,17 @@ const TaskContainer = ({ user, category, onClose }) => {
   Object.keys(groupedTasks).forEach((date) => {
     groupedTasks[date].sort((a, b) => {
       // Parse time strings into hours and minutes
-      const [hoursA, minutesA] = a.time.split(':').map(Number);
-      const [hoursB, minutesB] = b.time.split(':').map(Number);
+      const [hoursA, minutesA, secondsA] = a.time.split(':').map(Number);
+      const [hoursB, minutesB, secondsB] = b.time.split(':').map(Number);
 
       // Compare times in descending order
       if (hoursA !== hoursB) {
         return hoursB - hoursA;
       }
-      return minutesB - minutesA;
+      if (minutesA !== minutesB || (secondsA == undefined || secondsB == undefined)) {
+        return minutesB - minutesA;
+      }
+      return secondsB - secondsA;
     });
   });
 
@@ -158,8 +273,34 @@ const TaskContainer = ({ user, category, onClose }) => {
                     className={`task-card ${expandedTask === `${date}-${index}` ? 'expanded' : ''}`}
                     onClick={() => toggleComment(`${date}-${index}`)}
                   >
-                    <h4 className="task-title">{task.title}</h4>
-                    <p className="task-time">{task.time}</p>
+                    <div className='task-header'>
+                      <span className="task-title">{task.title}</span>
+                      <div className="dropdown"
+                        onClick={(e) => {
+                          // Prevent triggering the parent onClick event
+                          e.stopPropagation();
+                        }}>
+                        <Image
+                          src={`${basePath}/three-dots-icon.svg`}
+                          alt="Options"
+                          className="three-dots-icon"
+                          width={40}
+                          height={40}
+                          onClick={() => toggleDropdown(task.task_id)}
+                        />
+                        {openDropdownId === task.task_id && (
+                          <div className="dropdown-menu">
+                            <span onClick={() => openPopup('edit', task)} className="dropdown-item">
+                              Edit
+                            </span>
+                            <span onClick={() => openDeletePopup(task)} className="dropdown-item">
+                              Delete
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <p className="task-time">{convertTo12HourFormat(task.time)}</p>
                     {expandedTask === `${date}-${index}` && (
                       <p className={`task-comment ${task.comment ? '' : 'no-comment'}`}>
                         {task.comment || 'No comments'}
@@ -175,7 +316,40 @@ const TaskContainer = ({ user, category, onClose }) => {
       <div className="round-icon" onClick={togglePopup}>
         <Image src={`${basePath}/plus-icon-white.svg`} alt="Icon" className="icon-image" width={40} height={40} />
       </div>
-      {isPopupOpen && <AddItemPopUp category={category} onClose={togglePopup} onSave={addTask} isLoading={isLoading} />}
+      {isPopupOpen && (
+        <AddItemPopUp
+          category={category}
+          onClose={togglePopup}
+          onSave={handleSave}
+          currentTask={selectedTask}
+          popupMode={popupMode}
+          isLoading={isLoading}
+        />
+      )}
+
+      {isDeletePopupOpen && (
+        <div className="popup-overlay">
+          <div className="popup-container">
+            <h2>Delete {selectedTask?.title} task ?</h2>
+            <div className="popup-footer">
+              {isLoading ? (
+                <button className="deleting-button" disabled>
+                  Deleting...
+                </button>
+              ) : (
+                <>
+                  <button className="delete-button" onClick={handleDelete}>
+                    Yes
+                  </button>
+                  <button className="cancel-button" onClick={closeDeletePopup}>
+                    Cancel
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };

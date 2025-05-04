@@ -70,6 +70,7 @@
 }
 
 .task-card {
+  position: relative;
   background-color: #f5f5f5;
   border-radius: 8px;
   padding: 10px;
@@ -77,7 +78,11 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   cursor: pointer;
 }
-
+.task-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 .task-title {
   font-size: 16px;
   font-weight: bold;
