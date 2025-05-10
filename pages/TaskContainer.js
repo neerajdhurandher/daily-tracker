@@ -189,11 +189,6 @@ const TaskContainer = ({ user, category, onClose }) => {
   }
 
 
-  const trimTime = (time) => {
-    const [hours, minutes, seconds] = time.split(':').map(Number);
-    return `${hours}:${minutes < 10 ? '0' + minutes : minutes}`;
-  };
-
   // Group tasks by date in descending order and sort tasks by time within each date group
   const groupedTasks = tasks.reduce((acc, task) => {
     const date = task.date;
